@@ -1,0 +1,24 @@
+openapi: 3.0.3
+info:
+  title: Example API
+  version: 1.0.0
+  description: Example OpenAPI document for APIM module usage.
+servers:
+  - url: https://example-api-sbox.internal
+paths:
+  /health:
+    get:
+      summary: Health check
+      operationId: getHealth
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: UP
+components: {}
