@@ -1,3 +1,51 @@
+# ─── Variables injected automatically by the HMCTS GitHub Actions reusable workflow ───
+# These are passed as -var flags by terraform-deploy-openid and must be declared
+# even if not used by this module directly.
+
+variable "env" {
+  type        = string
+  description = "Environment name, injected by CI (e.g. sbox, dev, prod)."
+  default     = ""
+}
+
+variable "product" {
+  type        = string
+  description = "Product name, injected by CI."
+  default     = ""
+}
+
+variable "subscription" {
+  type        = string
+  description = "Azure subscription ID, injected by CI."
+  default     = ""
+}
+
+variable "aks_subscription_id" {
+  type        = string
+  description = "AKS subscription ID, injected by CI. Not used by this module."
+  default     = ""
+}
+
+variable "tenant_id" {
+  type        = string
+  description = "Azure tenant ID, injected by CI."
+  default     = ""
+}
+
+variable "builtFrom" {
+  type        = string
+  description = "Repository reference, injected by CI."
+  default     = ""
+}
+
+variable "ci_service_principal_object_id" {
+  type        = string
+  description = "CI service principal object ID, injected by CI."
+  default     = ""
+}
+
+# ─── Module-specific variables ───
+
 variable "api_mgmt_rg" {
   type        = string
   description = "Resource group name of the target APIM instance."
@@ -8,7 +56,7 @@ variable "api_mgmt_name" {
   description = "Name of the target APIM instance."
 }
 
-variable "product" {
+variable "apim_product" {
   description = "Product configuration to create in APIM."
   type = object({
     name                          = string

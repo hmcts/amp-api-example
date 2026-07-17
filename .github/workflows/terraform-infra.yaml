@@ -88,14 +88,12 @@ jobs:
             item="$(jq -nc \
               --arg environment "$env_name" \
               --arg subscription_var "AZURE_SUBSCRIPTION_${env_upper}" \
-              --arg aks_subscription_var "AKS_SUBSCRIPTION_${env_upper}" \
               --arg storage_account_var "$storage_var" \
               --arg azure_client_id_var "AZURE_CLIENT_ID_${env_upper}" \
               --arg azure_subscription_id_var "AZURE_SUBSCRIPTION_ID_${env_upper}" \
               '{
                 environment: $environment,
                 subscription_var: $subscription_var,
-                aks_subscription_var: $aks_subscription_var,
                 storage_account_var: $storage_account_var,
                 azure_client_id_var: $azure_client_id_var,
                 azure_subscription_id_var: $azure_subscription_id_var
@@ -108,9 +106,42 @@ jobs:
           echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
           echo "has_envs=$found" >> "$GITHUB_OUTPUT"
 
+  debug-matrix:
+    name: Debug matrix (${{ matrix.environment }})
+    needs: discover-environments
+    if: ${{
+      needs['discover-environments'].outputs.has_envs == 'true' &&
+      (
+        github.event_name != 'workflow_dispatch' ||
+        github.event.inputs.overrideAction == 'plan' ||
+        github.ref == 'refs/heads/main'
+      )
+      }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs['discover-environments'].outputs.matrix) }}
+    steps:
+      - name: Print resolved matrix values
+        run: |
+          echo "=== Matrix inputs for environment: ${{ matrix.environment }} ==="
+          echo "subscription_var:          ${{ matrix.subscription_var }}"
+          echo "storage_account_var:       ${{ matrix.storage_account_var }}"
+          echo "azure_client_id_var:       ${{ matrix.azure_client_id_var }}"
+          echo "azure_subscription_id_var: ${{ matrix.azure_subscription_id_var }}"
+          echo ""
+          echo "=== Resolved variable values ==="
+          echo "subscription:          ${{ vars[matrix.subscription_var] && '(set)' || '(EMPTY - variable not found)' }}"
+          echo "storage-account:       ${{ vars[matrix.storage_account_var] && '(set)' || '(EMPTY - variable not found)' }}"
+          echo "azure-client-id:       ${{ vars[matrix.azure_client_id_var] && '(set)' || '(EMPTY - variable not found)' }}"
+          echo "azure-subscription-id: ${{ vars[matrix.azure_subscription_id_var] && '(set)' || '(EMPTY - variable not found)' }}"
+          echo ""
+          echo "Full matrix JSON: ${{ toJson(matrix) }}"
+
   terraform:
     name: Terraform ${{ matrix.environment }}
-    needs: discover-environments
+    needs: [discover-environments, debug-matrix]
     if: ${{
       needs['discover-environments'].outputs.has_envs == 'true' &&
       (
@@ -128,7 +159,7 @@ jobs:
     with:
       environment: ${{ matrix.environment }}
       subscription: ${{ vars[matrix.subscription_var] }}
-      aks-subscription: ${{ vars[matrix.aks_subscription_var] }}
+      aks-subscription: ${{ vars[matrix.subscription_var] }}
       storage-account: ${{ vars[matrix.storage_account_var] }}
       azure-client-id: ${{ vars[matrix.azure_client_id_var] }}
       azure-subscription-id: ${{ vars[matrix.azure_subscription_id_var] }}

@@ -3,11 +3,11 @@ module "product" {
 
   api_mgmt_rg                   = var.api_mgmt_rg
   api_mgmt_name                 = var.api_mgmt_name
-  name                          = var.product.name
-  subscription_required         = var.product.subscription_required
-  subscriptions_limit           = var.product.subscriptions_limit
-  approval_required             = var.product.approval_required
-  published                     = var.product.published
-  product_access_control_groups = var.product.product_access_control_groups
-  product_policy                = var.product.product_policy
+  name                          = var.apim_product.name
+  subscription_required         = var.apim_product.subscription_required
+  subscriptions_limit           = var.apim_product.subscriptions_limit
+  approval_required             = var.apim_product.approval_required
+  published                     = var.apim_product.published
+  product_access_control_groups = var.apim_product.product_access_control_groups
+  product_policy                = var.apim_product.product_policy
 }
