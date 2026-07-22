@@ -1,7 +1,7 @@
 api_mgmt_rg   = "core-infra-sbox-rg"
 api_mgmt_name = "core-apim-sbox"
 
-product = {
+apim_product = {
   name                          = "example-product"
   subscription_required         = true
   subscriptions_limit           = 20
