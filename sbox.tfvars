@@ -7,7 +7,7 @@ apim_product = {
   subscriptions_limit           = 20
   approval_required             = false
   published                     = true
-  product_access_control_groups = ["Developers"]
+  product_access_control_groups = []
   product_policy                = ""
 }
 
