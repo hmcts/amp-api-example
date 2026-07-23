@@ -118,7 +118,7 @@ jobs:
       matrix:
         include: ${{ fromJson(needs['discover-environments'].outputs.matrix) }}
 
-    uses: hmcts/cnp-githubactions-library/.github/workflows/terraform-deploy-openId.yaml@feat/use-entra-id-auth-for-state
+    uses: hmcts/cnp-githubactions-library/.github/workflows/terraform-deploy-openId.yaml@main
     with:
       environment: ${{ matrix.environment }}
       subscription: ${{ vars[matrix.subscription_var] }}
