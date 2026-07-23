@@ -106,56 +106,19 @@ jobs:
           echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
           echo "has_envs=$found" >> "$GITHUB_OUTPUT"
 
-  debug-matrix:
-    name: Debug matrix (${{ matrix.environment }})
-    needs: discover-environments
-    if: ${{
-      needs['discover-environments'].outputs.has_envs == 'true' &&
-      (
-        github.event_name != 'workflow_dispatch' ||
-        github.event.inputs.overrideAction == 'plan' ||
-        github.ref == 'refs/heads/main'
-      )
-      }}
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include: ${{ fromJson(needs['discover-environments'].outputs.matrix) }}
-    steps:
-      - name: Print resolved matrix values
-        run: |
-          echo "=== Matrix inputs for environment: ${{ matrix.environment }} ==="
-          echo "subscription_var:          ${{ matrix.subscription_var }}"
-          echo "storage_account_var:       ${{ matrix.storage_account_var }}"
-          echo "azure_client_id_var:       ${{ matrix.azure_client_id_var }}"
-          echo "azure_subscription_id_var: ${{ matrix.azure_subscription_id_var }}"
-          echo ""
-          echo "=== Resolved variable values ==="
-          echo "subscription:          ${{ vars[matrix.subscription_var] && '(set)' || '(EMPTY - variable not found)' }}"
-          echo "storage-account:       ${{ vars[matrix.storage_account_var] && '(set)' || '(EMPTY - variable not found)' }}"
-          echo "azure-client-id:       ${{ vars[matrix.azure_client_id_var] && '(set)' || '(EMPTY - variable not found)' }}"
-          echo "azure-subscription-id: ${{ vars[matrix.azure_subscription_id_var] && '(set)' || '(EMPTY - variable not found)' }}"
-          echo ""
-          echo "Full matrix JSON: ${{ toJson(matrix) }}"
-
   terraform:
     name: Terraform ${{ matrix.environment }}
-    needs: [discover-environments, debug-matrix]
-    if: ${{
-      needs['discover-environments'].outputs.has_envs == 'true' &&
-      (
-        github.event_name != 'workflow_dispatch' ||
-        github.event.inputs.overrideAction == 'plan' ||
-        github.ref == 'refs/heads/main'
-      )
-      }}
+    needs: [ discover-environments ]
+    if: ${{ needs['discover-environments'].outputs.has_envs == 'true' && (
+      github.event_name != 'workflow_dispatch' ||
+      github.event.inputs.overrideAction == 'plan' || github.ref ==
+      'refs/heads/main' ) }}
     strategy:
       fail-fast: false
       matrix:
         include: ${{ fromJson(needs['discover-environments'].outputs.matrix) }}
 
-    uses: hmcts/cnp-githubactions-library/.github/workflows/terraform-deploy-openId.yaml@main
+    uses: hmcts/cnp-githubactions-library/.github/workflows/terraform-deploy-openId.yaml@feat/use-entra-id-auth-for-state
     with:
       environment: ${{ matrix.environment }}
       subscription: ${{ vars[matrix.subscription_var] }}
@@ -163,7 +126,12 @@ jobs:
       storage-account: ${{ vars[matrix.storage_account_var] }}
       azure-client-id: ${{ vars[matrix.azure_client_id_var] }}
       azure-subscription-id: ${{ vars[matrix.azure_subscription_id_var] }}
+      state-store-resource-group: rg-sps-platform-${{ matrix.environment }}
+      state-store-account-name: spsapimapi${{matrix.environment}}state
+      state-store-container-name: terraform-state
+      state-store-use-entra-id-auth: true
       working-directory: .
-      plan-only: ${{ github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.overrideAction == 'plan') }}
+      plan-only: ${{ github.event_name == 'pull_request' || (github.event_name ==
+        'workflow_dispatch' && github.event.inputs.overrideAction == 'plan') }}
       product: sps-platform
       post-plan-to-pr: true
