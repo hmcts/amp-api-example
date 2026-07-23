@@ -1,5 +1,5 @@
-api_mgmt_rg   = "core-infra-sbox-rg"
-api_mgmt_name = "core-apim-sbox"
+api_mgmt_rg   = "rg-sps-platform-sbox"
+api_mgmt_name = "sps-api-mgmt-sbox"
 
 apim_product = {
   name                          = "example-product"
