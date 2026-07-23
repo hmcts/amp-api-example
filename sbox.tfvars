@@ -15,7 +15,6 @@ apis = {
   example-api = {
     openapi_spec_path = "./specs/example-api.yaml"
     service_url       = "https://example-api-sbox.internal"
-    # name, path and display_name can be omitted and will default from the OpenAPI spec.
-    revision = "1"
+    revision          = "1"
   }
 }
